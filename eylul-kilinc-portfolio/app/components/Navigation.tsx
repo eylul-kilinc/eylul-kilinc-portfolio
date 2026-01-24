@@ -28,12 +28,16 @@ export default function Navigation() {
   }, [lastScrollY]);
 
   const navLinks = [
-    { href: '/', label: 'home' },
-    { href: '/biography', label: 'biography' },
+    { href: '/portfolio', label: 'Portfolio' },
     { href: '/theatre', label: 'theatre' },
     { href: '/visual-arts', label: 'visual arts' },
     { href: '/gallery', label: 'gallery' },
   ];
+
+  // Hide navigation on onboarding page (root /)
+  if (pathname === '/') {
+    return null;
+  }
 
   return (
     <nav 
@@ -45,7 +49,7 @@ export default function Navigation() {
         <div className="flex items-center justify-center gap-8 h-full">
           {navLinks.map((link) => {
             const isActive = pathname === link.href || 
-              (link.href !== '/' && pathname.startsWith(link.href));
+              (link.href !== '/portfolio' && pathname.startsWith(link.href));
             return (
               <Link 
                 key={link.href}
