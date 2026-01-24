@@ -1,10 +1,15 @@
+'use client';
+
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 
 export default function GalleryPage() {
+  const pathname = usePathname();
+  
   return (
-    <div className="min-h-screen bg-white font-sans">
+    <div className="min-h-screen bg-[#FAF7F2]">
       {/* Header Section with Background Image */}
-      <header className="relative w-full h-[300px]">
+      <header className="relative w-full h-[300px] z-10">
         <Image
           src="/placeholder-header.jpg"
           alt="Gallery Header"
@@ -13,8 +18,9 @@ export default function GalleryPage() {
           className="w-full h-full object-cover"
           priority
         />
-        <div className="absolute inset-0 flex items-center justify-center">
-          <h1 className="text-4xl md:text-5xl font-sans text-white tracking-wide">
+        <div className="absolute inset-0 header-overlay" aria-hidden="true" />
+        <div className="absolute inset-0 flex items-center justify-center z-10">
+          <h1 key={pathname} className="text-4xl md:text-5xl tracking-wide animated-underline inline-block">
             gallery
           </h1>
         </div>

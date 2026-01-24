@@ -1,15 +1,84 @@
 @import "tailwindcss";
 
+/* Canela Font Family */
+@font-face {
+  font-family: 'Canela';
+  src: url('/fonts/Canela-Thin-Trial.otf') format('opentype');
+  font-weight: 100;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Canela';
+  src: url('/fonts/Canela-Light-Trial.otf') format('opentype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Canela';
+  src: url('/fonts/Canela-Regular-Trial.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Canela';
+  src: url('/fonts/Canela-Medium-Trial.otf') format('opentype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Canela';
+  src: url('/fonts/Canela-Bold-Trial.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Canela';
+  src: url('/fonts/Canela-Black-Trial.otf') format('opentype');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Gallery-style color palette */
+  --background: #FAF7F2; /* Primary background - warm off-white */
+  --background-secondary: #C9C6C1; /* Secondary background - hero/sections - light stone gray */
+  --surface: #FAF7F2; /* Card/image container - transparent or warm off-white */
+  --text-primary: #2E2B28; /* Primary text - soft charcoal */
+  --text-secondary: #6E6A66; /* Secondary text - metadata, captions */
+  --text-nav: #3A3632; /* Navigation & small UI text */
+  --accent: #B46A4C; /* Accent - muted burnt clay (minimal usage) */
+  --border: #C9C6C1; /* Borders - light stone gray */
+  --header-overlay: rgba(201, 198, 193, 0.85); /* Hero overlay - stone gray with opacity */
+
+  --font-canela: 'Canela', serif;
 }
 
 @theme inline {
   --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-background-secondary: var(--background-secondary);
+  --color-surface: var(--surface);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-nav: var(--text-nav);
+  --color-accent: var(--accent);
+  --color-border: var(--border);
+  --color-header-overlay: var(--header-overlay);
+  --font-inter: var(--font-inter);
+  --font-roboto-mono: var(--font-roboto-mono);
+  --font-work-sans: var(--font-work-sans);
+  --font-crimson-text: var(--font-crimson-text);
+  --font-canela: 'Canela', serif;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -19,8 +88,158 @@
   }
 }
 
+html, body {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
 body {
   background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  color: var(--text-primary);
+  font-family: var(--font-crimson-text), serif;
+}
+
+/* Headings: Canela + soft charcoal */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-canela) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Allow text-black to override heading color - use soft charcoal */
+h1.text-black, h2.text-black, h3.text-black, h4.text-black, h5.text-black, h6.text-black {
+  color: var(--text-primary) !important;
+}
+
+/* Apply Crimson Text to all body text (except navigation) - soft charcoal */
+p, span, li, ul, ol, .text-base, .text-lg, .text-xl, .text-2xl {
+  font-family: var(--font-crimson-text) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Navigation links - Inter with nav text color */
+nav a {
+  font-family: var(--font-inter) !important;
+  color: var(--text-nav) !important;
+}
+
+nav a:hover {
+  color: var(--accent) !important; /* muted burnt clay on hover */
+}
+
+/* Animated underline keyframes */
+@keyframes underline-draw {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+/* Navigation active link animated underline */
+nav a.active {
+  position: relative;
+  text-decoration: none;
+}
+
+nav a.active::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background-color: var(--accent);
+  animation: underline-draw 0.5s ease-out forwards;
+}
+
+/* Animated underline for category links and hero text */
+.animated-underline {
+  position: relative;
+  text-decoration: none;
+}
+
+.animated-underline::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background-color: var(--accent);
+  animation: underline-draw 0.6s ease-out forwards;
+}
+
+/* Hero text underline - slightly thicker */
+h1.animated-underline::after {
+  height: 2px;
+  bottom: -4px;
+  animation: underline-draw 0.8s ease-out forwards;
+}
+
+/* Play names (h2) underline - medium thickness */
+h2.animated-underline::after {
+  height: 1.5px;
+  bottom: -3px;
+  animation: underline-draw 0.7s ease-out forwards;
+}
+
+/* Apply Inter to navigation */
+nav, .nav {
+  font-family: var(--font-inter) !important;
+}
+
+/* Apply Work Sans to small UI text and buttons */
+small, .text-sm, .text-xs, button, .button, .font-work-sans {
+  font-family: var(--font-work-sans) !important;
+}
+
+/* Apply Inter to UI text */
+.font-inter {
+  font-family: var(--font-inter) !important;
+}
+
+/* Links + UI colors */
+a {
+  color: inherit;
+}
+
+nav {
+  background: var(--surface);
+  border-color: var(--border);
+}
+
+nav a {
+  color: var(--text-nav);
+}
+
+nav a:hover {
+  color: var(--accent);
+}
+
+/* Utility helpers */
+.ui-border {
+  border-color: var(--border) !important;
+}
+
+.ui-muted {
+  color: var(--text-secondary) !important;
+}
+
+.ui-accent {
+  color: var(--text-primary) !important;
+}
+
+.ui-accent:hover {
+  color: var(--accent) !important;
+}
+
+.header-overlay {
+  background: var(--header-overlay);
+}
+
+/* Hero sections use secondary background */
+.hero-bg {
+  background: var(--background-secondary);
 }

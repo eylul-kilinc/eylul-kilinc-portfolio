@@ -1,16 +1,32 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import Link from "next/link";
+import { Inter, Roboto_Mono, Work_Sans, Crimson_Text } from "next/font/google";
 import "./globals.css";
+import Navigation from "./components/Navigation";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
+  display: "swap",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const robotoMono = Roboto_Mono({
+  variable: "--font-roboto-mono",
   subsets: ["latin"],
+  display: "swap",
+});
+
+const workSans = Work_Sans({
+  variable: "--font-work-sans",
+  subsets: ["latin"],
+  display: "swap",
+});
+
+const crimsonText = Crimson_Text({
+  variable: "--font-crimson-text",
+  subsets: ["latin"],
+  weight: ["400", "600", "700"],
+  style: ["normal", "italic"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -26,47 +42,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${inter.variable} ${robotoMono.variable} ${workSans.variable} ${crimsonText.variable} antialiased`}
       >
-        <nav className="w-full bg-white border-b border-gray-200 fixed top-0 left-0 right-0 z-50">
-          <div className="max-w-6xl mx-auto px-8">
-            <div className="flex items-center justify-center gap-8 py-4">
-              <Link 
-                href="/" 
-                className="text-base font-serif text-[#8B4513] hover:text-[#6B3410] transition-colors"
-              >
-                home
-              </Link>
-              <Link 
-                href="/biography" 
-                className="text-base font-serif text-[#8B4513] hover:text-[#6B3410] transition-colors"
-              >
-                biography
-              </Link>
-              <Link 
-                href="/theatre" 
-                className="text-base font-serif text-[#8B4513] hover:text-[#6B3410] transition-colors"
-              >
-                theatre
-              </Link>
-              <Link 
-                href="/visual-arts" 
-                className="text-base font-serif text-[#8B4513] hover:text-[#6B3410] transition-colors"
-              >
-                visual arts
-              </Link>
-              <Link 
-                href="/gallery" 
-                className="text-base font-serif text-[#8B4513] hover:text-[#6B3410] transition-colors"
-              >
-                gallery
-              </Link>
-            </div>
-          </div>
-        </nav>
-        <div className="pt-[73px]">
-          {children}
-        </div>
+        <Navigation />
+        {children}
       </body>
     </html>
   );
