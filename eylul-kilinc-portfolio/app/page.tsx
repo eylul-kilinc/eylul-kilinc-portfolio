@@ -5,11 +5,11 @@ import Link from "next/link";
 
 export default function OnboardingPage() {
   return (
-    <div className="min-h-screen bg-white flex flex-col items-center justify-center">
+    <div className="min-h-screen bg-[#FAF7F2] flex flex-col items-center justify-center">
       {/* Image */}
       <div className="w-full max-w-4xl px-8 mb-8">
         <Image
-          src="/Arka plansız .png"
+          src="/umut11.png"
           alt="Eylul Kilinc"
           width={1200}
           height={1600}

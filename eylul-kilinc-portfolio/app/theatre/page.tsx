@@ -186,7 +186,7 @@ export default function TheatrePage() {
 
               {/* Text Information */}
               <div className="flex-1">
-                <h2 key={`${pathname}-${selectedCategory}-${play.title}-${play.year}-${index}`} className="text-3xl md:text-4xl font-bold mb-4 animated-underline inline-block">
+                <h2 key={`${pathname}-${selectedCategory}-${play.title}-${play.year}-${index}`} className="text-3xl md:text-4xl font-bold mb-4 play-title-underline inline-block">
                   {play.title} {play.year && `(${play.year})`}
                 </h2>
                 <ul className="text-base space-y-2 ui-muted">

@@ -41,7 +41,7 @@ export default function Navigation() {
 
   return (
     <nav 
-      className={`w-full fixed top-0 left-0 right-0 z-[9999] h-[56px] transition-transform duration-300 ui-border border-b ${
+      className={`w-full fixed top-0 left-0 right-0 z-[9999] h-[56px] transition-transform duration-500 ease-in-out ui-border border-b ${
         isVisible ? 'translate-y-0' : '-translate-y-full'
       }`}
     >

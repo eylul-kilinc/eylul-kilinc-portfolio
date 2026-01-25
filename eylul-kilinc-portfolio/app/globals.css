@@ -137,6 +137,16 @@ nav a:hover {
   }
 }
 
+/* Fixed width underline animation for play titles */
+@keyframes underline-draw-fixed {
+  from {
+    width: 0;
+  }
+  to {
+    width: 300px;
+  }
+}
+
 /* Navigation active link animated underline */
 nav a.active {
   position: relative;
@@ -185,6 +195,24 @@ h2.animated-underline::after {
   bottom: -3px;
   background-color: #000000;
   animation: underline-draw 0.7s ease-out forwards;
+}
+
+/* Play title underline - fixed width for consistency */
+.play-title-underline {
+  position: relative;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.play-title-underline::after {
+  content: '';
+  position: absolute;
+  bottom: -3px;
+  left: 0;
+  width: 300px;
+  height: 1.5px;
+  background-color: #000000 !important;
+  animation: underline-draw-fixed 0.7s ease-out forwards;
 }
 
 /* Apply Inter to navigation */
