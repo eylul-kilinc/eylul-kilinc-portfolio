@@ -30,8 +30,11 @@ const crimsonText = Crimson_Text({
 });
 
 export const metadata: Metadata = {
-  title: "Eylul Kilinc Portfolio",
+  title: "Eylül Kılınç",
   description: "Portfolio of Eylul Kilinc",
+  icons: {
+    icon: "/icon.png",
+  },
 };
 
 export default function RootLayout({
