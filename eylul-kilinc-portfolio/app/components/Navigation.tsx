@@ -28,10 +28,10 @@ export default function Navigation() {
   }, [lastScrollY]);
 
   const navLinks = [
-    { href: '/portfolio', label: 'Portfolio' },
+    { href: '/portfolio', label: 'portfolio' },
     { href: '/theatre', label: 'theatre' },
     { href: '/visual-arts', label: 'visual arts' },
-    { href: '/gallery', label: 'gallery' },
+    // { href: '/gallery', label: 'gallery' }, // hidden for now
   ];
 
   // Hide navigation on onboarding page (root /)

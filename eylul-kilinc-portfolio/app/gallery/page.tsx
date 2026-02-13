@@ -11,7 +11,7 @@ export default function GalleryPage() {
       {/* Header Section with Background Image */}
       <header className="relative w-full h-[300px] z-10">
         <Image
-          src="/placeholder-header.jpg"
+          src="/banner.png"
           alt="Gallery Header"
           width={1000}
           height={300}
