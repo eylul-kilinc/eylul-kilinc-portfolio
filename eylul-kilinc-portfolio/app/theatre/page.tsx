@@ -1,7 +1,7 @@
 'use client';
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 
 interface Play {
@@ -152,6 +152,19 @@ export default function TheatrePage() {
   const pathname = usePathname();
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState<{ [key: number]: number }>({});
+  const [previousImageIndex, setPreviousImageIndex] = useState<{ [key: number]: number | null }>({});
+  const [slideDirection, setSlideDirection] = useState<{ [key: number]: "next" | "prev" }>({});
+  const [isSliding, setIsSliding] = useState<{ [key: number]: boolean }>({});
+  const [slidePhase, setSlidePhase] = useState<{ [key: number]: boolean }>({});
+  const slideTimeoutsRef = useRef<{ [key: number]: ReturnType<typeof setTimeout> | null }>({});
+
+  useEffect(() => {
+    return () => {
+      Object.values(slideTimeoutsRef.current).forEach((timeoutId) => {
+        if (timeoutId) clearTimeout(timeoutId);
+      });
+    };
+  }, []);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -169,18 +182,42 @@ export default function TheatrePage() {
     }
   }, []);
 
+  const startSlide = (playIndex: number, totalImages: number, direction: "next" | "prev") => {
+    if (isSliding[playIndex] || totalImages <= 1) return;
+
+    const currentIndex = currentImageIndex[playIndex] || 0;
+    const nextIndex =
+      direction === "next"
+        ? (currentIndex + 1) % totalImages
+        : (currentIndex - 1 + totalImages) % totalImages;
+
+    if (slideTimeoutsRef.current[playIndex]) {
+      clearTimeout(slideTimeoutsRef.current[playIndex]!);
+    }
+
+    setPreviousImageIndex((prev) => ({ ...prev, [playIndex]: currentIndex }));
+    setSlideDirection((prev) => ({ ...prev, [playIndex]: direction }));
+    setCurrentImageIndex((prev) => ({ ...prev, [playIndex]: nextIndex }));
+    setSlidePhase((prev) => ({ ...prev, [playIndex]: false }));
+    setIsSliding((prev) => ({ ...prev, [playIndex]: true }));
+    requestAnimationFrame(() => {
+      setSlidePhase((prev) => ({ ...prev, [playIndex]: true }));
+    });
+
+    slideTimeoutsRef.current[playIndex] = setTimeout(() => {
+      setPreviousImageIndex((prev) => ({ ...prev, [playIndex]: null }));
+      setIsSliding((prev) => ({ ...prev, [playIndex]: false }));
+      setSlidePhase((prev) => ({ ...prev, [playIndex]: false }));
+      slideTimeoutsRef.current[playIndex] = null;
+    }, 450);
+  };
+
   const nextImage = (playIndex: number, totalImages: number) => {
-    setCurrentImageIndex(prev => ({
-      ...prev,
-      [playIndex]: ((prev[playIndex] || 0) + 1) % totalImages
-    }));
+    startSlide(playIndex, totalImages, "next");
   };
 
   const prevImage = (playIndex: number, totalImages: number) => {
-    setCurrentImageIndex(prev => ({
-      ...prev,
-      [playIndex]: ((prev[playIndex] || 0) - 1 + totalImages) % totalImages
-    }));
+    startSlide(playIndex, totalImages, "prev");
   };
 
   return (
@@ -242,7 +279,13 @@ export default function TheatrePage() {
           {selectedCategory && playsByCategory[selectedCategory]?.map((play, index) => {
           const isLeft = index % 2 === 0;
           const currentIndex = currentImageIndex[index] || 0;
+          const previousIndex = previousImageIndex[index];
+          const direction = slideDirection[index] || "next";
+          const currentlySliding = !!isSliding[index];
+          const phaseStarted = !!slidePhase[index];
           const currentImage = play.images[currentIndex];
+          const previousImage = previousIndex !== null && previousIndex !== undefined ? play.images[previousIndex] : null;
+          const previousImageNumber = (previousIndex ?? 0) + 1;
 
           return (
             <div
@@ -254,13 +297,46 @@ export default function TheatrePage() {
               {/* Image Carousel */}
               <div className="flex-1 relative">
                 <div className="relative w-full aspect-video bg-[#FAF7F2] overflow-hidden">
-                  <Image
-                    src={currentImage}
-                    alt={`${play.title} - Image ${currentIndex + 1}`}
-                    width={600}
-                    height={400}
-                    className="w-full h-full object-cover"
-                  />
+                  {previousImage && currentlySliding && (
+                    <div
+                      className="absolute inset-0 transition-transform ease-in-out"
+                      style={{
+                        transitionDuration: "450ms",
+                        transform: phaseStarted
+                          ? direction === "next"
+                            ? "translateX(-100%)"
+                            : "translateX(100%)"
+                          : "translateX(0)",
+                      }}
+                    >
+                      <Image
+                        src={previousImage}
+                        alt={`${play.title} - Previous image ${previousImageNumber}`}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                  )}
+                  <div
+                    className="absolute inset-0 transition-transform ease-in-out"
+                    style={{
+                      transitionDuration: "450ms",
+                      transform: currentlySliding
+                        ? phaseStarted
+                          ? "translateX(0)"
+                          : direction === "next"
+                            ? "translateX(100%)"
+                            : "translateX(-100%)"
+                        : "translateX(0)",
+                    }}
+                  >
+                    <Image
+                      src={currentImage}
+                      alt={`${play.title} - Image ${currentIndex + 1}`}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
                   {play.images.length > 1 && (
                     <>
                       <button
