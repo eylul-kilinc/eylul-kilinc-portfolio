@@ -31,6 +31,7 @@ export default function Navigation() {
     { href: '/portfolio', label: 'portfolio' },
     { href: '/theatre', label: 'theatre' },
     { href: '/visual-arts', label: 'visual arts' },
+    { href: '/interactive-exhibition', label: 'interactive exhibition' },
     // { href: '/gallery', label: 'gallery' }, // hidden for now
   ];
 

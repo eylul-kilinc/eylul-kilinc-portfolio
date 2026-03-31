@@ -1,7 +1,7 @@
 'use client';
 
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 
 interface Play {
@@ -77,6 +77,28 @@ const playsByCategory: { [key: string]: Play[] } = {
       images: caucasianChalkCircleImages
     }
   ],
+  acting: [
+    {
+      title: "THE WALL",
+      year: "",
+      writtenBy: "POETRY NIGHT",
+      producedBy: "actor",
+      location: "",
+      images: ["/placeholder-play1.jpg"]
+    },
+    {
+      title: "HARBOUR",
+      year: "",
+      writtenBy: "DANCE NIGHT",
+      producedBy: "actor",
+      location: "",
+      images: shuffle([
+        '/dans/DSCF1751.JPG', '/dans/DSCF1758.JPG', '/dans/DSCF1771.JPG', '/dans/DSCF1773.JPG',
+        '/dans/DSCF1837.JPG', '/dans/DSCF1841.JPG', '/dans/DSCF1853.JPG', '/dans/DSCF1854.JPG',
+        '/dans/DSCF2112.JPG', '/dans/DSCF2113.JPG', '/dans/DSCF2198.JPG', '/dans/DSCF2199.JPG',
+      ])
+    }
+  ],
   scriptwriting: [
     {
       title: "AY IŞIĞINDA ŞAMATA",
@@ -130,6 +152,22 @@ export default function TheatrePage() {
   const pathname = usePathname();
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState<{ [key: number]: number }>({});
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const categoryParam = params.get("category");
+    if (categoryParam === "writing") {
+      setSelectedCategory("scriptwriting");
+      return;
+    }
+    if (
+      categoryParam === "directing" ||
+      categoryParam === "scriptwriting" ||
+      categoryParam === "acting"
+    ) {
+      setSelectedCategory(categoryParam);
+    }
+  }, []);
 
   const nextImage = (playIndex: number, totalImages: number) => {
     setCurrentImageIndex(prev => ({

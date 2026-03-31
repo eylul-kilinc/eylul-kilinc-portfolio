@@ -1,7 +1,7 @@
 'use client';
 
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 
 const categories = [
@@ -59,6 +59,18 @@ const mixedWorksImages = [
 export default function VisualArtsPage() {
   const pathname = usePathname();
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const categoryParam = params.get("category");
+    if (
+      categoryParam === "photography" ||
+      categoryParam === "videography" ||
+      categoryParam === "mixed media"
+    ) {
+      setSelectedCategory(categoryParam);
+    }
+  }, []);
 
   // Placeholder content for each category
   const getCategoryContent = () => {
