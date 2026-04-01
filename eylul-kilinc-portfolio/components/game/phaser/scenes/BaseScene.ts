@@ -19,7 +19,6 @@ export abstract class BaseScene extends Phaser.Scene {
   protected player!: Player;
   protected doors: DoorObjects[] = [];
   protected ground!: Phaser.GameObjects.Rectangle;
-  protected instructionText!: Phaser.GameObjects.Text;
   protected interactionText!: Phaser.GameObjects.Text;
   protected currentDoor: DoorObjects | null = null;
   protected debugHitboxes = false;
@@ -77,7 +76,6 @@ export abstract class BaseScene extends Phaser.Scene {
 
     if (sceneConfig) {
       this.createDoors(sceneConfig);
-      this.createInstructionText(sceneConfig.instructionText);
     }
 
     this.interactionText = this.add
@@ -197,53 +195,6 @@ export abstract class BaseScene extends Phaser.Scene {
 
       this.doors.push({ config: door, zone });
     });
-  }
-
-  protected createInstructionText(text: string) {
-    const { width } = this.scale;
-    const instructionWithBackHint = text.toLowerCase().includes("press r")
-      ? text
-      : `${text}\nPress R to return to the previous room.`;
-
-    // Background box behind instruction text for readability
-    const paddingX = 12;
-    const isBottomInstructionScene =
-      this.scene.key === "VisualArtsScene" || this.scene.key === "ScreenplaysScene";
-    const paddingY = isBottomInstructionScene ? 6 : 8;
-    const fontSize = isBottomInstructionScene ? "12px" : "14px";
-    const maxTextWidth = width - 2 * paddingX - 16;
-
-    // Measure wrapped text first, then size the box to fit.
-    const tempText = this.add
-      .text(0, 0, instructionWithBackHint, {
-        fontSize,
-        color: "#000000",
-        wordWrap: { width: maxTextWidth },
-        align: "center",
-      })
-      .setVisible(false);
-
-    const boxWidth = width - 2 * paddingX;
-    const boxHeight = tempText.height + paddingY * 2;
-    tempText.destroy();
-    const boxY = isBottomInstructionScene
-      ? this.scale.height - 34 - boxHeight / 2
-      : 10 + boxHeight / 2;
-
-    const box = this.add
-      .rectangle(width / 2, boxY, boxWidth, boxHeight, 0xffffff, 0.9)
-      .setOrigin(0.5, 0.5)
-      .setDepth(8);
-
-    this.instructionText = this.add
-      .text(width / 2, box.y, instructionWithBackHint, {
-        fontSize,
-        color: "#000000",
-        wordWrap: { width: maxTextWidth },
-        align: "center",
-      })
-      .setOrigin(0.5, 0.5)
-      .setDepth(9);
   }
 
   protected showInteractionPrompt(door: DoorConfig) {

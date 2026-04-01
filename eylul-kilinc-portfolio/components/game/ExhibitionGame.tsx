@@ -66,7 +66,7 @@ export default function ExhibitionGame() {
   }, []);
 
   return (
-    <div className="w-full flex justify-center items-center py-16 relative">
+    <div className="relative flex w-full justify-center items-center pt-2 pb-12 md:pt-4 md:pb-16">
       <div
         ref={containerRef}
         style={{

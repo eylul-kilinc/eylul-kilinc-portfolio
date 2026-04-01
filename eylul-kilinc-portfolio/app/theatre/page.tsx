@@ -225,7 +225,7 @@ export default function TheatrePage() {
       {/* Header Section with Background Image */}
       <header className="relative w-full h-[300px] z-10">
         <Image
-          src="/banner.png"
+          src="/new-images/1%20copy.png"
           alt="Theatre Header"
           width={1000}
           height={300}

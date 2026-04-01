@@ -59,7 +59,7 @@
   --text-nav: #3A3632; /* Navigation & small UI text */
   --accent: #B46A4C; /* Accent - muted burnt clay (minimal usage) */
   --border: #C9C6C1; /* Borders - light stone gray */
-  --header-overlay: rgba(201, 198, 193, 0.85); /* Hero overlay - stone gray with opacity */
+  --header-overlay: rgba(255, 255, 255, 0.2); /* hero wash: white 20% */
 
   --font-canela: 'Canela', serif;
 }

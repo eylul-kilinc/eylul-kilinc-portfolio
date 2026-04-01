@@ -13,7 +13,6 @@ export type DoorConfig = {
 
 export type SceneDoors = {
   sceneKey: string;
-  instructionText: string;
   doors: DoorConfig[];
 };
 
@@ -41,7 +40,6 @@ export const SCENE_KEYS = {
 export const DOOR_CONFIGS: SceneDoors[] = [
   {
     sceneKey: SCENE_KEYS.Exterior,
-    instructionText: "Side view: move left/right with A/D or Arrow Keys. Approach the entrance and press E.",
     doors: [
       {
         id: "exterior-to-lobby",
@@ -59,7 +57,6 @@ export const DOOR_CONFIGS: SceneDoors[] = [
   },
   {
     sceneKey: SCENE_KEYS.Lobby,
-    instructionText: "Choose a room. Left: Theatre. Right: Visual Arts. Press E near a door to enter.",
     doors: [
       {
         id: "lobby-to-screenplays",
@@ -91,7 +88,6 @@ export const DOOR_CONFIGS: SceneDoors[] = [
   },
   {
     sceneKey: SCENE_KEYS.Screenplays,
-    instructionText: "Explore theatre. Click the boxes to open directing, acting, and writing.",
     doors: [
       {
         id: "screenplays-back-lobby",
@@ -109,7 +105,6 @@ export const DOOR_CONFIGS: SceneDoors[] = [
   },
   {
     sceneKey: SCENE_KEYS.VisualArts,
-    instructionText: "Explore visual arts, Click the boxes to open works.",
     doors: [
       {
         id: "visual-back-lobby",
@@ -127,7 +122,6 @@ export const DOOR_CONFIGS: SceneDoors[] = [
   },
   {
     sceneKey: SCENE_KEYS.ScreenplayWork1,
-    instructionText: "Screenplay Work 1. Explore the piece, then use the pink door to return.",
     doors: [
       {
         id: "screenplay1-back-main",
@@ -145,7 +139,6 @@ export const DOOR_CONFIGS: SceneDoors[] = [
   },
   {
     sceneKey: SCENE_KEYS.ScreenplayWork2,
-    instructionText: "Screenplay Work 2. Explore the piece, then use the pink door to return.",
     doors: [
       {
         id: "screenplay2-back-main",
@@ -163,7 +156,6 @@ export const DOOR_CONFIGS: SceneDoors[] = [
   },
   {
     sceneKey: SCENE_KEYS.ScreenplayWork3,
-    instructionText: "Screenplay Work 3. Explore the piece, then use the pink door to return.",
     doors: [
       {
         id: "screenplay3-back-main",
@@ -181,7 +173,6 @@ export const DOOR_CONFIGS: SceneDoors[] = [
   },
   {
     sceneKey: SCENE_KEYS.VisualArtWork1,
-    instructionText: "Visual Art Work 1. Explore the piece, then use the pink door to return.",
     doors: [
       {
         id: "visual1-back-main",
@@ -199,7 +190,6 @@ export const DOOR_CONFIGS: SceneDoors[] = [
   },
   {
     sceneKey: SCENE_KEYS.VisualArtWork2,
-    instructionText: "Visual Art Work 2. Explore the piece, then use the pink door to return.",
     doors: [
       {
         id: "visual2-back-main",
@@ -217,7 +207,6 @@ export const DOOR_CONFIGS: SceneDoors[] = [
   },
   {
     sceneKey: SCENE_KEYS.VisualArtWork3,
-    instructionText: "Visual Art Work 3. Explore the piece, then use the pink door to return.",
     doors: [
       {
         id: "visual3-back-main",
