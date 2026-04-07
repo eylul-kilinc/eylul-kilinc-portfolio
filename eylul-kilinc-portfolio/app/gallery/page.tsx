@@ -27,16 +27,16 @@ export default function GalleryPage() {
       </header>
 
       {/* Gallery Content */}
-      <main className="w-full max-w-6xl mx-auto px-8 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <main className="mx-auto w-full max-w-7xl px-6 py-16 sm:px-8">
+        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 xl:grid-cols-3 lg:gap-10">
           {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((i) => (
-            <div key={i} className="aspect-square relative">
+            <div key={i} className="relative aspect-square">
               <Image
                 src="/placeholder-visual-arts.jpg"
                 alt={`Gallery Image ${i}`}
-                width={400}
-                height={400}
-                className="w-full h-full object-cover"
+                width={600}
+                height={600}
+                className="h-full w-full object-cover"
               />
             </div>
           ))}

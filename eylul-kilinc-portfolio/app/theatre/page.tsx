@@ -242,25 +242,25 @@ export default function TheatrePage() {
 
       {/* Category Selection Section */}
       {!selectedCategory && (
-        <main className="w-full max-w-6xl mx-auto px-8 py-16 flex flex-col items-center">
-          <div className="flex flex-wrap justify-center gap-12 md:gap-16 mb-16">
+        <main className="mx-auto flex w-full max-w-7xl flex-col items-center px-6 py-16 sm:px-8">
+          <div className="mb-16 flex flex-wrap justify-center gap-10 md:gap-14 lg:gap-20">
             {categories.map((category) => (
               <button
                 key={category.name}
                 onClick={() => setSelectedCategory(category.name)}
                 className="flex flex-col items-center cursor-pointer hover:opacity-80 transition-opacity"
               >
-                <div className="w-[250px] h-[250px] mb-4 relative">
+                <div className="relative mb-5 h-[min(72vw,320px)] w-[min(72vw,320px)] sm:h-[min(70vw,380px)] sm:w-[min(70vw,380px)] md:h-[400px] md:w-[400px]">
                   <Image
                     src={category.image}
                     alt={category.name}
-                    width={250}
-                    height={250}
-                    className="w-full h-full object-cover"
+                    width={400}
+                    height={400}
+                    className="h-full w-full object-cover"
                   />
                   <div className="absolute inset-0 bg-black/50 pointer-events-none" aria-hidden="true" />
                 </div>
-                <p key={`${pathname}-${category.name}`} className="text-xl ui-accent transition-colors animated-underline inline-block">{category.name}</p>
+                <p key={`${pathname}-${category.name}`} className="text-2xl ui-accent transition-colors animated-underline inline-block md:text-3xl">{category.name}</p>
               </button>
             ))}
           </div>
@@ -269,7 +269,7 @@ export default function TheatrePage() {
 
       {/* Plays Section - Zig Zag Layout */}
       {selectedCategory && (
-        <main className="w-full max-w-6xl mx-auto px-8 py-16">
+        <main className="mx-auto w-full max-w-7xl px-6 py-16 sm:px-8">
           <button
             onClick={() => setSelectedCategory(null)}
             className="mb-8 text-xl ui-accent transition-colors"

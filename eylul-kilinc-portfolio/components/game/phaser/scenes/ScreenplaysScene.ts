@@ -40,14 +40,6 @@ export class ScreenplaysScene extends BaseScene {
         url: "/theatre?category=directing",
       },
       {
-        x: 240,
-        y: 126,
-        w: 108,
-        h: 166,
-        title: "Acting",
-        url: "/theatre?category=acting",
-      },
-      {
         x: 386,
         y: 126,
         w: 130,

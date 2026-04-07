@@ -79,15 +79,15 @@ export default function VisualArtsPage() {
     switch (selectedCategory) {
       case 'photography':
         return (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 xl:grid-cols-3 lg:gap-10">
             {photographyImages.map((filename, i) => (
               <div key={filename} className="aspect-square relative overflow-hidden">
                 <Image
                   src={`/icons/photography/${filename}`}
                   alt={`Photography ${i + 1}`}
-                  width={400}
-                  height={400}
-                  className="w-full h-full object-cover"
+                  width={600}
+                  height={600}
+                  className="h-full w-full object-cover"
                 />
               </div>
             ))}
@@ -96,7 +96,7 @@ export default function VisualArtsPage() {
       case 'videography':
         return (
           <div className="grid grid-cols-1 gap-6">
-            <div className="w-full max-w-4xl mx-auto aspect-video relative bg-[#2E2B28] rounded overflow-hidden">
+            <div className="relative mx-auto aspect-video w-full max-w-5xl overflow-hidden rounded bg-[#2E2B28] xl:max-w-6xl">
               <video
                 src="/videography/Plot%20yok.mp4"
                 controls
@@ -110,15 +110,15 @@ export default function VisualArtsPage() {
         );
       case 'mixed media':
         return (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 xl:grid-cols-3 lg:gap-10">
             {mixedWorksImages.map((filename, i) => (
               <div key={filename} className="aspect-square relative overflow-hidden">
                 <Image
                   src={`/mixed/${encodeURIComponent(filename)}`}
                   alt={`Mixed work ${i + 1}`}
-                  width={400}
-                  height={400}
-                  className="w-full h-full object-cover"
+                  width={600}
+                  height={600}
+                  className="h-full w-full object-cover"
                 />
               </div>
             ))}
@@ -151,25 +151,25 @@ export default function VisualArtsPage() {
 
       {/* Category Selection Section */}
       {!selectedCategory && (
-        <main className="w-full max-w-6xl mx-auto px-8 py-16">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-16">
+        <main className="mx-auto flex w-full max-w-7xl flex-col items-center px-6 py-16 sm:px-8">
+          <div className="mb-16 flex flex-wrap justify-center gap-10 md:gap-14 lg:gap-20">
             {categories.map((category) => (
               <button
                 key={category.name}
                 onClick={() => setSelectedCategory(category.name)}
                 className="flex flex-col items-center cursor-pointer hover:opacity-80 transition-opacity"
               >
-                <div className="w-[250px] h-[250px] mb-4 relative">
+                <div className="relative mb-5 h-[min(72vw,320px)] w-[min(72vw,320px)] sm:h-[min(70vw,380px)] sm:w-[min(70vw,380px)] md:h-[400px] md:w-[400px]">
                   <Image
                     src={category.image}
                     alt={category.name}
-                    width={250}
-                    height={250}
-                    className="w-full h-full object-cover"
+                    width={400}
+                    height={400}
+                    className="h-full w-full object-cover"
                   />
                   <div className="absolute inset-0 bg-black/50 pointer-events-none" aria-hidden="true" />
                 </div>
-                <p key={`${pathname}-${category.name}`} className="text-xl ui-accent transition-colors animated-underline inline-block">{category.name}</p>
+                <p key={`${pathname}-${category.name}`} className="text-2xl ui-accent transition-colors animated-underline inline-block md:text-3xl">{category.name}</p>
               </button>
             ))}
           </div>
@@ -178,7 +178,7 @@ export default function VisualArtsPage() {
 
       {/* Content Section */}
       {selectedCategory && (
-        <main className="w-full max-w-6xl mx-auto px-8 py-16">
+        <main className="mx-auto w-full max-w-7xl px-6 py-16 sm:px-8">
           <button
             onClick={() => setSelectedCategory(null)}
             className="mb-8 text-xl ui-accent transition-colors"
