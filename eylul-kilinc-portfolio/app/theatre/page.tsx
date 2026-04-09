@@ -143,8 +143,8 @@ const playsByCategory: { [key: string]: Play[] } = {
 };
 
 const categories = [
-  { name: 'directing', image: '/icons/directingicon.png' },
-  { name: 'scriptwriting', image: '/icons/scriptwirintgicon.png' },
+  { name: 'directing', image: '/button%20images/WhatsApp%20Image%202026-04-08%20at%2021.37.57.jpeg' },
+  { name: 'scriptwriting', image: '/button%20images/WhatsApp%20Image%202026-04-08%20at%2021.33.42.jpeg' },
   { name: 'acting', image: '/button%20images/8f9c510f-12c6-4fab-8d8c-ba41f9fe2e11%202.jpg' },
   // { name: 'stage design', image: '/icons/stagedesign.png' } // temporarily removed
 ];
@@ -249,7 +249,7 @@ export default function TheatrePage() {
               <button
                 key={category.name}
                 onClick={() => setSelectedCategory(category.name)}
-                className="flex flex-col items-center cursor-pointer hover:opacity-80 transition-opacity"
+                className="flex flex-col items-center cursor-pointer opacity-80 hover:opacity-100 transition-opacity"
               >
                 <div className="relative mb-5 h-[min(72vw,320px)] w-[min(72vw,320px)] sm:h-[min(44vw,300px)] sm:w-[min(44vw,300px)] md:h-[300px] md:w-[300px]">
                   <Image

@@ -5,9 +5,9 @@ import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 
 const categories = [
-  { name: 'photography', image: '/icons/newvideography.png' },
-  { name: 'videography', image: '/icons/videographyicon.png' },
-  { name: 'mixed media', image: '/icons/mixedworkicon.png' }
+  { name: 'photography', image: '/button%20images/WhatsApp%20Image%202026-04-08%20at%2021.50.19.jpeg' },
+  { name: 'videography', image: '/button%20images/WhatsApp%20Image%202026-04-08%20at%2021.47.01.jpeg' },
+  { name: 'mixed media', image: '/button%20images/WhatsApp%20Image%202026-04-08%20at%2022.02.10.jpeg' }
 ];
 
 const photographyImages = [
@@ -157,7 +157,7 @@ export default function VisualArtsPage() {
               <button
                 key={category.name}
                 onClick={() => setSelectedCategory(category.name)}
-                className="flex flex-col items-center cursor-pointer hover:opacity-80 transition-opacity"
+                className="flex flex-col items-center cursor-pointer opacity-80 hover:opacity-100 transition-opacity"
               >
                 <div className="relative mb-5 h-[min(72vw,320px)] w-[min(72vw,320px)] sm:h-[min(44vw,300px)] sm:w-[min(44vw,300px)] md:h-[300px] md:w-[300px]">
                   <Image
