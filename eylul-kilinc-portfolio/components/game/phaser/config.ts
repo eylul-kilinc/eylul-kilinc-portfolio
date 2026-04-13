@@ -11,6 +11,11 @@ export const createGameConfig = (
   parent,
   width: GAME_WIDTH,
   height: GAME_HEIGHT,
+  // Avoid Web Audio API lifecycle issues in Next.js (HMR / route changes / strict mode).
+  // This minigame does not use Phaser sound; HTML5 audio remains available if needed later.
+  audio: {
+    disableWebAudio: true,
+  },
   backgroundColor: "#1a1a1a",
   // Preserve crisp pixel rendering for scaled pixel art
   pixelArt: true,

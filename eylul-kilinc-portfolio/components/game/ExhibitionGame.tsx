@@ -73,7 +73,6 @@ export default function ExhibitionGame() {
           width: "960px",
           height: "720px",
           maxWidth: "100%",
-          border: "1px solid rgba(0,0,0,0.1)",
           background: "#111",
           imageRendering: "pixelated",
         }}

@@ -1,8 +1,9 @@
 'use client';
 
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
+import { preloadImageUrls } from "@/lib/useImagePreload";
 
 interface Play {
   title: string;
@@ -11,6 +12,16 @@ interface Play {
   producedBy: string;
   location: string;
   images: string[];
+}
+
+const THEATRE_IMAGE_FALLBACK = "/placeholder-theatre.jpg";
+
+/** Next/Image rejects empty `src`; some builds may briefly see out-of-range index. */
+function theatreSlideSrc(images: readonly string[], index: number): string {
+  const at = images[index];
+  if (typeof at === "string" && at.trim() !== "") return at;
+  const firstValid = images.find((u) => typeof u === "string" && u.trim() !== "");
+  return firstValid ?? THEATRE_IMAGE_FALLBACK;
 }
 
 /* Fisher–Yates shuffle – returns new array in random order */
@@ -149,15 +160,46 @@ const categories = [
   // { name: 'stage design', image: '/icons/stagedesign.png' } // temporarily removed
 ];
 
+const SLIDE_DURATION_MS = 650;
+const SLIDE_EASING = "cubic-bezier(0.22, 1, 0.36, 1)";
+
 export default function TheatrePage() {
   const pathname = usePathname();
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState<{ [key: number]: number }>({});
-  const [previousImageIndex, setPreviousImageIndex] = useState<{ [key: number]: number | null }>({});
+  /** During slide: index of incoming image; settled `currentImageIndex` stays as outgoing until animation ends */
+  const [incomingImageIndex, setIncomingImageIndex] = useState<{
+    [key: number]: number | null;
+  }>({});
   const [slideDirection, setSlideDirection] = useState<{ [key: number]: "next" | "prev" }>({});
   const [isSliding, setIsSliding] = useState<{ [key: number]: boolean }>({});
   const [slidePhase, setSlidePhase] = useState<{ [key: number]: boolean }>({});
   const slideTimeoutsRef = useRef<{ [key: number]: ReturnType<typeof setTimeout> | null }>({});
+
+  const preloadTheatreUrls = useMemo(() => {
+    if (!selectedCategory) return [];
+    const plays = playsByCategory[selectedCategory];
+    if (!plays?.length) return [];
+    return plays.flatMap((p) => p.images);
+  }, [selectedCategory]);
+
+  const theatreUrlsKey = preloadTheatreUrls.join("\0");
+  const [theatreGalleryReady, setTheatreGalleryReady] = useState(false);
+
+  useEffect(() => {
+    if (preloadTheatreUrls.length === 0) {
+      setTheatreGalleryReady(true);
+      return;
+    }
+    let cancelled = false;
+    setTheatreGalleryReady(false);
+    preloadImageUrls(preloadTheatreUrls).then(() => {
+      if (!cancelled) setTheatreGalleryReady(true);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [theatreUrlsKey]);
 
   useEffect(() => {
     return () => {
@@ -196,21 +238,24 @@ export default function TheatrePage() {
       clearTimeout(slideTimeoutsRef.current[playIndex]!);
     }
 
-    setPreviousImageIndex((prev) => ({ ...prev, [playIndex]: currentIndex }));
     setSlideDirection((prev) => ({ ...prev, [playIndex]: direction }));
-    setCurrentImageIndex((prev) => ({ ...prev, [playIndex]: nextIndex }));
+    setIncomingImageIndex((prev) => ({ ...prev, [playIndex]: nextIndex }));
     setSlidePhase((prev) => ({ ...prev, [playIndex]: false }));
     setIsSliding((prev) => ({ ...prev, [playIndex]: true }));
+    // Double rAF so the browser paints the initial transform before transitioning.
     requestAnimationFrame(() => {
-      setSlidePhase((prev) => ({ ...prev, [playIndex]: true }));
+      requestAnimationFrame(() => {
+        setSlidePhase((prev) => ({ ...prev, [playIndex]: true }));
+      });
     });
 
     slideTimeoutsRef.current[playIndex] = setTimeout(() => {
-      setPreviousImageIndex((prev) => ({ ...prev, [playIndex]: null }));
+      setCurrentImageIndex((prev) => ({ ...prev, [playIndex]: nextIndex }));
+      setIncomingImageIndex((prev) => ({ ...prev, [playIndex]: null }));
       setIsSliding((prev) => ({ ...prev, [playIndex]: false }));
       setSlidePhase((prev) => ({ ...prev, [playIndex]: false }));
       slideTimeoutsRef.current[playIndex] = null;
-    }, 450);
+    }, SLIDE_DURATION_MS);
   };
 
   const nextImage = (playIndex: number, totalImages: number) => {
@@ -221,10 +266,35 @@ export default function TheatrePage() {
     startSlide(playIndex, totalImages, "prev");
   };
 
+  const nextImageRef = useRef(nextImage);
+  nextImageRef.current = nextImage;
+
+  useEffect(() => {
+    if (!selectedCategory || !theatreGalleryReady) return;
+    const plays = playsByCategory[selectedCategory];
+    if (!plays?.length) return;
+
+    const intervalMs = 4500;
+    const ids: ReturnType<typeof setInterval>[] = [];
+
+    plays.forEach((play, index) => {
+      if (play.images.length <= 1) return;
+      ids.push(
+        setInterval(() => {
+          nextImageRef.current(index, play.images.length);
+        }, intervalMs)
+      );
+    });
+
+    return () => {
+      ids.forEach((id) => clearInterval(id));
+    };
+  }, [selectedCategory, theatreGalleryReady]);
+
   return (
     <div className="min-h-screen bg-[#FAF7F2]">
       {/* Header Section with Background Image */}
-      <header className="relative w-full h-[300px] z-10">
+      <header className="relative z-10 h-[300px] w-full bg-[#2E2B28]">
         <Image
           src="/new-images/1%20copy.png"
           alt="Theatre Header"
@@ -234,9 +304,28 @@ export default function TheatrePage() {
           priority
         />
         <div className="absolute inset-0 header-overlay" aria-hidden="true" />
+        <div
+          className="pointer-events-none absolute inset-x-0 top-0 z-[8] h-24 bg-[linear-gradient(180deg,rgba(0,0,0,0.6)_0%,rgba(0,0,0,0.3)_42%,rgba(0,0,0,0.12)_70%,transparent_100%)]"
+          aria-hidden="true"
+        />
+        <div
+          className="pointer-events-none absolute inset-x-0 top-full z-[8] h-14 -translate-y-1/2 sm:h-16"
+          style={{
+            backgroundImage:
+              "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='56' viewBox='0 0 220 56'%3E%3Cpath d='M0 28 C9.17 14.67 18.33 14.67 27.5 28 C36.67 41.33 45.83 41.33 55 28 C64.17 14.67 73.33 14.67 82.5 28 C91.67 41.33 100.83 41.33 110 28 C119.17 14.67 128.33 14.67 137.5 28 C146.67 41.33 155.83 41.33 165 28 C174.17 14.67 183.33 14.67 192.5 28 C201.67 41.33 210.83 41.33 220 28' fill='none' stroke='%2317141c' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E\")",
+            backgroundRepeat: "repeat-x",
+            backgroundPosition: "center top",
+            backgroundSize: "220px 56px",
+          }}
+          aria-hidden="true"
+        />
+        <div
+          className="pointer-events-none absolute inset-x-0 top-full z-[7] h-28 -translate-y-1/2 bg-[linear-gradient(180deg,rgba(255,255,255,0.16)_0%,rgba(250,247,242,0.58)_52%,#FAF7F2_100%)] sm:h-36"
+          aria-hidden="true"
+        />
         <div className="absolute inset-0 flex items-center justify-center z-10">
-          <h1 key={`${pathname}-${selectedCategory || 'theatre'}`} className="text-4xl md:text-5xl tracking-wide animated-underline inline-block">
-            {selectedCategory || 'theatre'}
+          <h1 key={`${pathname}-${selectedCategory || 'Theatre'}`} className="text-4xl md:text-5xl tracking-wide animated-underline inline-block">
+            {selectedCategory || 'Theatre'}
           </h1>
         </div>
       </header>
@@ -279,13 +368,15 @@ export default function TheatrePage() {
           {selectedCategory && playsByCategory[selectedCategory]?.map((play, index) => {
           const isLeft = index % 2 === 0;
           const currentIndex = currentImageIndex[index] || 0;
-          const previousIndex = previousImageIndex[index];
+          const incomingIndex = incomingImageIndex[index];
           const direction = slideDirection[index] || "next";
           const currentlySliding = !!isSliding[index];
           const phaseStarted = !!slidePhase[index];
-          const currentImage = play.images[currentIndex];
-          const previousImage = previousIndex !== null && previousIndex !== undefined ? play.images[previousIndex] : null;
-          const previousImageNumber = (previousIndex ?? 0) + 1;
+          const outgoingImage = theatreSlideSrc(play.images, currentIndex);
+          const incomingImage =
+            incomingIndex !== null && incomingIndex !== undefined
+              ? theatreSlideSrc(play.images, incomingIndex)
+              : null;
 
           return (
             <div
@@ -296,48 +387,92 @@ export default function TheatrePage() {
             >
               {/* Image Carousel */}
               <div className="flex-1 relative">
-                <div className="relative w-full aspect-video bg-[#FAF7F2] overflow-hidden">
-                  {previousImage && currentlySliding && (
+                <div className="relative w-full aspect-video overflow-hidden bg-[#2E2B28]">
+                  {!theatreGalleryReady ? (
                     <div
-                      className="absolute inset-0 transition-transform ease-in-out"
+                      className="absolute inset-0 bg-[#FAF7F2] animate-pulse"
+                      aria-busy="true"
+                      aria-label="Loading photos"
+                    />
+                  ) : incomingImage && currentlySliding ? (
+                    <div
+                      className="absolute inset-0 flex h-full w-[200%] flex-row flex-nowrap gap-0 bg-[#2E2B28]"
                       style={{
-                        transitionDuration: "450ms",
-                        transform: phaseStarted
-                          ? direction === "next"
-                            ? "translateX(-100%)"
-                            : "translateX(100%)"
-                          : "translateX(0)",
+                        transitionProperty: "transform",
+                        transitionDuration: `${SLIDE_DURATION_MS}ms`,
+                        transitionTimingFunction: SLIDE_EASING,
+                        willChange: "transform",
+                        transform:
+                          direction === "next"
+                            ? phaseStarted
+                              ? "translateX(-50%)"
+                              : "translateX(0)"
+                            : phaseStarted
+                              ? "translateX(0)"
+                              : "translateX(-50%)",
                       }}
                     >
+                      {direction === "next" ? (
+                        <>
+                          <div className="relative h-full min-w-0 shrink-0 basis-1/2 overflow-hidden bg-[#2E2B28]">
+                            <Image
+                              src={outgoingImage}
+                              alt={`${play.title} - Image ${currentIndex + 1}`}
+                              fill
+                              unoptimized
+                              sizes="(max-width: 1280px) 100vw, 896px"
+                              className="object-cover object-center"
+                            />
+                          </div>
+                          <div className="relative -ml-px h-full min-w-0 shrink-0 basis-[calc(50%+1px)] overflow-hidden bg-[#2E2B28]">
+                            <Image
+                              src={incomingImage}
+                              alt={`${play.title} - Image ${(incomingIndex ?? 0) + 1}`}
+                              fill
+                              unoptimized
+                              sizes="(max-width: 1280px) 100vw, 896px"
+                              className="object-cover object-center"
+                            />
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <div className="relative h-full min-w-0 shrink-0 basis-1/2 overflow-hidden bg-[#2E2B28]">
+                            <Image
+                              src={incomingImage}
+                              alt={`${play.title} - Image ${(incomingIndex ?? 0) + 1}`}
+                              fill
+                              unoptimized
+                              sizes="(max-width: 1280px) 100vw, 896px"
+                              className="object-cover object-center"
+                            />
+                          </div>
+                          <div className="relative -ml-px h-full min-w-0 shrink-0 basis-[calc(50%+1px)] overflow-hidden bg-[#2E2B28]">
+                            <Image
+                              src={outgoingImage}
+                              alt={`${play.title} - Image ${currentIndex + 1}`}
+                              fill
+                              unoptimized
+                              sizes="(max-width: 1280px) 100vw, 896px"
+                              className="object-cover object-center"
+                            />
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="absolute inset-0 bg-[#2E2B28]">
                       <Image
-                        src={previousImage}
-                        alt={`${play.title} - Previous image ${previousImageNumber}`}
+                        src={outgoingImage}
+                        alt={`${play.title} - Image ${currentIndex + 1}`}
                         fill
+                        unoptimized
+                        sizes="(max-width: 1280px) 100vw, 896px"
                         className="object-cover"
                       />
                     </div>
                   )}
-                  <div
-                    className="absolute inset-0 transition-transform ease-in-out"
-                    style={{
-                      transitionDuration: "450ms",
-                      transform: currentlySliding
-                        ? phaseStarted
-                          ? "translateX(0)"
-                          : direction === "next"
-                            ? "translateX(100%)"
-                            : "translateX(-100%)"
-                        : "translateX(0)",
-                    }}
-                  >
-                    <Image
-                      src={currentImage}
-                      alt={`${play.title} - Image ${currentIndex + 1}`}
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                  {play.images.length > 1 && (
+                  {play.images.length > 1 && theatreGalleryReady && (
                     <>
                       <button
                         onClick={() => prevImage(index, play.images.length)}

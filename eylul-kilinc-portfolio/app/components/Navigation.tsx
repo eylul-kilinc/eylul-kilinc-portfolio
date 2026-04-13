@@ -28,10 +28,10 @@ export default function Navigation() {
   }, [lastScrollY]);
 
   const navLinks = [
-    { href: '/portfolio', label: 'portfolio' },
-    { href: '/theatre', label: 'theatre' },
-    { href: '/visual-arts', label: 'visual arts' },
-    { href: '/interactive-exhibition', label: 'interactive exhibition' },
+    { href: '/portfolio', label: 'Home' },
+    { href: '/theatre', label: 'Theatre' },
+    { href: '/visual-arts', label: 'Visual Arts' },
+    { href: '/interactive-exhibition', label: 'Interactive Exhibition', showWalker: true },
     // { href: '/gallery', label: 'gallery' }, // hidden for now
   ];
 
@@ -55,14 +55,56 @@ export default function Navigation() {
               <Link 
                 key={link.href}
                 href={link.href} 
-                className={`text-base transition-colors ${isActive ? 'active' : ''}`}
+                className={`inline-flex items-center gap-1 text-base transition-colors ${isActive ? 'active' : ''}`}
               >
                 {link.label}
+                {link.showWalker && (
+                  <span className="inline-flex align-[-0.15em]" aria-hidden="true">
+                    <span className="nav-walker">
+                      <img src="/exhibition-character.png" alt="" className="nav-walker-frame nav-walker-frame-1" />
+                      <img src="/exhibition-character-2.png" alt="" className="nav-walker-frame nav-walker-frame-2" />
+                    </span>
+                  </span>
+                )}
               </Link>
             );
           })}
         </div>
       </div>
+      <style jsx>{`
+        .nav-walker {
+          position: relative;
+          display: inline-block;
+          width: 0.95em;
+          height: 0.95em;
+        }
+
+        .nav-walker-frame {
+          position: absolute;
+          inset: 0;
+          width: 100%;
+          height: 100%;
+          image-rendering: pixelated;
+        }
+
+        .nav-walker-frame-1 {
+          animation: navWalkFrame1 0.35s steps(1) infinite;
+        }
+
+        .nav-walker-frame-2 {
+          animation: navWalkFrame2 0.35s steps(1) infinite;
+        }
+
+        @keyframes navWalkFrame1 {
+          0%, 49.99% { opacity: 1; }
+          50%, 100% { opacity: 0; }
+        }
+
+        @keyframes navWalkFrame2 {
+          0%, 49.99% { opacity: 0; }
+          50%, 100% { opacity: 1; }
+        }
+      `}</style>
     </nav>
   );
 }

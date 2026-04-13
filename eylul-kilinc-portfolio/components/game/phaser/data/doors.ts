@@ -47,7 +47,7 @@ export const DOOR_CONFIGS: SceneDoors[] = [
         y: 210,
         width: 100,
         height: 110,
-        label: "Entrance",
+        label: "",
         targetScene: SCENE_KEYS.Lobby,
         spawnX: 160,
         spawnY: 140,

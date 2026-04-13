@@ -82,6 +82,8 @@ export abstract class BaseScene extends Phaser.Scene {
       .text(width / 2, height - 12, "", {
         fontSize: "14px",
         color: "#000000",
+        backgroundColor: "transparent",
+        padding: { x: 0, y: 0 },
       })
       .setOrigin(0.5, 0.5)
       .setDepth(10);
@@ -96,18 +98,16 @@ export abstract class BaseScene extends Phaser.Scene {
 
       const rKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R);
       rKey.on("down", () => {
-        if (this.transitionData.returnScene) {
-          this.cameras.main.fadeOut(200, 0, 0, 0);
-          this.cameras.main.once(
-            Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE,
-            () => {
-              this.scene.start(this.transitionData.returnScene as string, {
-                spawnX: this.transitionData.returnSpawnX ?? this.scale.width / 2,
-                spawnY: this.transitionData.returnSpawnY ?? this.scale.height - 120,
-              });
-            }
-          );
-        }
+        if (this.scene.key === SCENE_KEYS.Exterior) return;
+
+        this.cameras.main.fadeOut(200, 0, 0, 0);
+        this.cameras.main.once(
+          Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE,
+          () => {
+            // R always returns to the initial exterior scene.
+            this.scene.start(SCENE_KEYS.Exterior);
+          }
+        );
       });
     }
 
@@ -198,6 +198,11 @@ export abstract class BaseScene extends Phaser.Scene {
   }
 
   protected showInteractionPrompt(door: DoorConfig) {
+    this.interactionText.setStyle({
+      color: "#050505",
+      backgroundColor: "rgba(255,255,255,0.65)",
+      padding: { x: 8, y: 4 },
+    });
     this.interactionText.setText("Press E to enter");
   }
 
@@ -225,6 +230,10 @@ export abstract class BaseScene extends Phaser.Scene {
       if (!overlapping) {
         this.currentDoor = null;
         this.interactionText.setText("");
+        this.interactionText.setStyle({
+          backgroundColor: "transparent",
+          padding: { x: 0, y: 0 },
+        });
       }
     }
   }

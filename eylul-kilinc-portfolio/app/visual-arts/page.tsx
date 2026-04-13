@@ -1,8 +1,30 @@
 'use client';
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { preloadImageUrls } from "@/lib/useImagePreload";
 import { usePathname } from "next/navigation";
+
+function ArrowIcon({ direction }: { direction: "left" | "right" }) {
+  const rotateClass = direction === "left" ? "rotate-180" : "";
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      className={`h-7 w-7 md:h-8 md:w-8 ${rotateClass}`}
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M9 5L16 12L9 19"
+        stroke="currentColor"
+        strokeWidth="2.25"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
 
 const categories = [
   { name: 'photography', image: '/button%20images/WhatsApp%20Image%202026-04-08%20at%2021.50.19.jpeg' },
@@ -59,6 +81,37 @@ const mixedWorksImages = [
 export default function VisualArtsPage() {
   const pathname = usePathname();
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [lightboxImages, setLightboxImages] = useState<string[]>([]);
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+
+  const preloadVisualUrls = useMemo(() => {
+    if (!selectedCategory) return [];
+    if (selectedCategory === "photography") {
+      return photographyImages.map((f) => `/icons/photography/${f}`);
+    }
+    if (selectedCategory === "mixed media") {
+      return mixedWorksImages.map((f) => `/mixed/${encodeURIComponent(f)}`);
+    }
+    return [];
+  }, [selectedCategory]);
+
+  const visualUrlsKey = preloadVisualUrls.join("\0");
+  const [visualGalleryReady, setVisualGalleryReady] = useState(false);
+
+  useEffect(() => {
+    if (preloadVisualUrls.length === 0) {
+      setVisualGalleryReady(true);
+      return;
+    }
+    let cancelled = false;
+    setVisualGalleryReady(false);
+    preloadImageUrls(preloadVisualUrls).then(() => {
+      if (!cancelled) setVisualGalleryReady(true);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [visualUrlsKey]);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -72,25 +125,91 @@ export default function VisualArtsPage() {
     }
   }, []);
 
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (lightboxIndex === null || lightboxImages.length === 0) return;
+
+      if (event.key === "ArrowLeft") {
+        setLightboxIndex((prev) =>
+          prev === null ? prev : (prev - 1 + lightboxImages.length) % lightboxImages.length
+        );
+      }
+      if (event.key === "ArrowRight") {
+        setLightboxIndex((prev) =>
+          prev === null ? prev : (prev + 1) % lightboxImages.length
+        );
+      }
+      if (event.key === "Escape") {
+        setLightboxIndex(null);
+      }
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [lightboxIndex, lightboxImages]);
+
+  const openLightbox = (images: string[], index: number) => {
+    setLightboxImages(images);
+    setLightboxIndex(index);
+  };
+
+  const closeLightbox = () => {
+    setLightboxIndex(null);
+  };
+
+  const goToPreviousImage = () => {
+    setLightboxIndex((prev) =>
+      prev === null ? prev : (prev - 1 + lightboxImages.length) % lightboxImages.length
+    );
+  };
+
+  const goToNextImage = () => {
+    setLightboxIndex((prev) =>
+      prev === null ? prev : (prev + 1) % lightboxImages.length
+    );
+  };
+
   // Placeholder content for each category
   const getCategoryContent = () => {
     if (!selectedCategory) return null;
-    
+
+    if (
+      (selectedCategory === "photography" || selectedCategory === "mixed media") &&
+      !visualGalleryReady
+    ) {
+      return (
+        <div
+          className="flex min-h-[50vh] w-full items-center justify-center rounded-lg bg-[#FAF7F2] animate-pulse"
+          aria-busy="true"
+          aria-label="Loading images"
+        />
+      );
+    }
+
     switch (selectedCategory) {
       case 'photography':
         return (
           <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 xl:grid-cols-3 lg:gap-10">
-            {photographyImages.map((filename, i) => (
-              <div key={filename} className="aspect-square relative overflow-hidden">
-                <Image
-                  src={`/icons/photography/${filename}`}
-                  alt={`Photography ${i + 1}`}
-                  width={600}
-                  height={600}
-                  className="h-full w-full object-cover"
-                />
-              </div>
-            ))}
+            {photographyImages.map((filename, i) => {
+              const src = `/icons/photography/${filename}`;
+              return (
+                <button
+                  key={filename}
+                  type="button"
+                  onClick={() => openLightbox(photographyImages.map((img) => `/icons/photography/${img}`), i)}
+                  className="relative overflow-hidden bg-[#2E2B28] text-left"
+                >
+                  <Image
+                    src={src}
+                    alt={`Photography ${i + 1}`}
+                    width={1200}
+                    height={1200}
+                    unoptimized
+                    className="w-full h-auto object-contain"
+                  />
+                </button>
+              );
+            })}
           </div>
         );
       case 'videography':
@@ -112,15 +231,26 @@ export default function VisualArtsPage() {
         return (
           <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 xl:grid-cols-3 lg:gap-10">
             {mixedWorksImages.map((filename, i) => (
-              <div key={filename} className="aspect-square relative overflow-hidden">
+              <button
+                key={filename}
+                type="button"
+                onClick={() =>
+                  openLightbox(
+                    mixedWorksImages.map((img) => `/mixed/${encodeURIComponent(img)}`),
+                    i
+                  )
+                }
+                className="relative overflow-hidden bg-[#2E2B28] text-left"
+              >
                 <Image
                   src={`/mixed/${encodeURIComponent(filename)}`}
                   alt={`Mixed work ${i + 1}`}
-                  width={600}
-                  height={600}
-                  className="h-full w-full object-cover"
+                  width={1200}
+                  height={1200}
+                  unoptimized
+                  className="w-full h-auto object-contain"
                 />
-              </div>
+              </button>
             ))}
           </div>
         );
@@ -132,7 +262,7 @@ export default function VisualArtsPage() {
   return (
     <div className="min-h-screen bg-[#FAF7F2]">
       {/* Header Section with Background Image */}
-      <header className="relative w-full h-[300px] z-10">
+      <header className="relative z-10 h-[300px] w-full bg-[#2E2B28]">
         <Image
           src="/new-images/1%20copy.png"
           alt="Visual Arts Header"
@@ -142,9 +272,28 @@ export default function VisualArtsPage() {
           priority
         />
         <div className="absolute inset-0 header-overlay" aria-hidden="true" />
+        <div
+          className="pointer-events-none absolute inset-x-0 top-0 z-[8] h-24 bg-[linear-gradient(180deg,rgba(0,0,0,0.6)_0%,rgba(0,0,0,0.3)_42%,rgba(0,0,0,0.12)_70%,transparent_100%)]"
+          aria-hidden="true"
+        />
+        <div
+          className="pointer-events-none absolute inset-x-0 top-full z-[8] h-14 -translate-y-1/2 sm:h-16"
+          style={{
+            backgroundImage:
+              "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='56' viewBox='0 0 220 56'%3E%3Cpath d='M0 28 C9.17 14.67 18.33 14.67 27.5 28 C36.67 41.33 45.83 41.33 55 28 C64.17 14.67 73.33 14.67 82.5 28 C91.67 41.33 100.83 41.33 110 28 C119.17 14.67 128.33 14.67 137.5 28 C146.67 41.33 155.83 41.33 165 28 C174.17 14.67 183.33 14.67 192.5 28 C201.67 41.33 210.83 41.33 220 28' fill='none' stroke='%2317141c' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E\")",
+            backgroundRepeat: "repeat-x",
+            backgroundPosition: "center top",
+            backgroundSize: "220px 56px",
+          }}
+          aria-hidden="true"
+        />
+        <div
+          className="pointer-events-none absolute inset-x-0 top-full z-[7] h-28 -translate-y-1/2 bg-[linear-gradient(180deg,rgba(255,255,255,0.16)_0%,rgba(250,247,242,0.58)_52%,#FAF7F2_100%)] sm:h-36"
+          aria-hidden="true"
+        />
         <div className="absolute inset-0 flex items-center justify-center z-10">
-          <h1 key={`${pathname}-${selectedCategory || 'visual arts'}`} className="text-4xl md:text-5xl tracking-wide animated-underline inline-block">
-            {selectedCategory || 'visual arts'}
+          <h1 key={`${pathname}-${selectedCategory || 'Visual Arts'}`} className="text-4xl md:text-5xl tracking-wide animated-underline inline-block">
+            {selectedCategory || 'Visual Arts'}
           </h1>
         </div>
       </header>
@@ -177,14 +326,16 @@ export default function VisualArtsPage() {
 
       {/* Content Section */}
       {selectedCategory && (
-        <main className="mx-auto w-full max-w-7xl px-6 py-16 sm:px-8">
+        <main className="mx-auto flex min-h-[calc(100vh-300px)] w-full max-w-7xl flex-col px-6 py-16 sm:px-8">
           <button
             onClick={() => setSelectedCategory(null)}
             className="mb-8 text-xl ui-accent transition-colors"
           >
             ← Back
           </button>
-          {getCategoryContent()}
+          <div className="flex flex-1 items-center">
+            <div className="w-full">{getCategoryContent()}</div>
+          </div>
           
           {/* Section Navigation - Bottom */}
           <div className="flex justify-between items-center mt-16 pt-8 border-t ui-border">
@@ -226,6 +377,64 @@ export default function VisualArtsPage() {
             </div>
           </div>
         </main>
+      )}
+
+      {lightboxIndex !== null && lightboxImages.length > 0 && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4"
+          onClick={closeLightbox}
+        >
+          <button
+            type="button"
+            onClick={(event) => {
+              event.stopPropagation();
+              closeLightbox();
+            }}
+            className="absolute top-4 right-4 md:top-5 md:right-5 flex h-11 w-11 items-center justify-center rounded-full bg-black/35 text-3xl text-white transition hover:bg-black/55"
+            aria-label="Close image viewer"
+          >
+            ×
+          </button>
+
+          <button
+            type="button"
+            onClick={(event) => {
+              event.stopPropagation();
+              goToPreviousImage();
+            }}
+            className="absolute left-3 md:left-6 flex h-12 w-12 md:h-14 md:w-14 items-center justify-center rounded-full bg-black/35 text-white transition hover:bg-black/55"
+            aria-label="Previous image"
+          >
+            <ArrowIcon direction="left" />
+          </button>
+
+          <div
+            className="relative h-[85vh] w-[92vw] max-w-6xl bg-[#1a1816]"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <Image
+              src={lightboxImages[lightboxIndex]}
+              alt={`Artwork ${lightboxIndex + 1}`}
+              fill
+              unoptimized
+              className="object-contain"
+              sizes="92vw"
+              priority
+            />
+          </div>
+
+          <button
+            type="button"
+            onClick={(event) => {
+              event.stopPropagation();
+              goToNextImage();
+            }}
+            className="absolute right-3 md:right-6 flex h-12 w-12 md:h-14 md:w-14 items-center justify-center rounded-full bg-black/35 text-white transition hover:bg-black/55"
+            aria-label="Next image"
+          >
+            <ArrowIcon direction="right" />
+          </button>
+        </div>
       )}
     </div>
   );
